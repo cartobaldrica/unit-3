@@ -4,6 +4,7 @@ body{
     height:100vh;
     overflow:hidden;
     font-family: sans-serif;
+    background:#d6e0f5;
 }
 
 .axis path,
@@ -24,4 +25,23 @@ body{
 }
 .innerRect{
     fill:white;
+}
+.counties{
+    fill:white;
+    stroke:#bfbfbf;
+    stroke-dasharray: 4px;
+}
+.highways{
+    stroke:#d9d9d9;
+    stroke-width:0.25px;
+    fill:none;
+}
+.neighborhood{
+    fill:#8cd9b1;
+    stroke:white;
+}
+.neighborhood:hover{
+    stroke:black;
+    stroke-width:2px;
+    cursor:pointer;
 }
