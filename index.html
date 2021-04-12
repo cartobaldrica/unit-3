@@ -6,11 +6,27 @@
             <title></title>
 
         <link rel="stylesheet" href="css/style.css">
-       
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"> 
         
     </head>
 
     <body>
+
+        <div id="splash" class="fullpage">
+            <div id="title-text">
+                <h1>What makes up your neighborhood?</h1>
+                <h3>Land use in Milwaukee's neighborhoods</h3>
+                <p>Every neighborhood is different. Some are sprawling subdivisions of single-family homes, while others combine commercial, green space, and apartment buildings. 
+                    Zoning provides some insight into these differences, but often neglects de facto land usage, such as roads, or highways.
+                    This map combines zoning code data with with de facto land use to paint a picture of each of Milwaukee's neighborhoods. Milwaukee is known as one, if not
+                    the, most segregated city in America, and this land use dataset shows how differences are carved onto the land itself.</p>
+                <p id="sources"><b>Sources: </b> Land Use Codes: <a href="https://data.milwaukee.gov/dataset/landusecode">City of Milwaukee</a>, Milwaukee Neighborhoods: <a href="https://data.milwaukee.gov/dataset/neighborhoods">City of Milwaukee</a>, Land Parcels: <a href="https://webgis.uwm.edu/mproppal/">MPROP</a></p>
+                <br/><br/>
+                <a id="goto" href="#viz">Take me to the Map</a>
+            </div>
+        </div>
+        <div id="viz" class="fullpage"></div>
+        
         <script type="text/javascript" src="lib/jquery-3.4.1.js"></script>
         <script type="text/javascript" src="lib/d3.js"></script>
         <script type="text/javascript" src="lib/topojson.js"></script>

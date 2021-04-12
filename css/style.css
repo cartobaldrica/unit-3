@@ -2,10 +2,38 @@ body{
     margin:0;
     width:100vw;
     height:100vh;
-    font-family: sans-serif;
+    font-family: 'Roboto', sans-serif;
     background-color: black;
+    overflow-x:hidden;
 }
-
+.fullpage{
+    width:100vw;
+    height:100vh;
+    position:relative;
+}
+#splash{
+    color:white;
+}
+#title-text
+{
+    width:50%;
+    margin:auto;
+    padding-top:100px;
+}
+#title-text h1{
+    font-size:80px;
+    margin-bottom:10px;
+}
+#title-text h3{
+    margin-top:0;
+    font-size:30px;
+}
+#sources{
+    font-size:14px;
+}
+#goto{
+    font-size:35px;
+}
 .axis path,
 .axis line{
     fill:none;
@@ -44,6 +72,7 @@ body{
 }
 .neighborhood:hover{
     stroke-dasharray: none;
+    cursor:pointer;
 }
 .map {
     background-color: rgba(0,0,0,1);
@@ -52,15 +81,21 @@ body{
     stroke:white;
     stroke-width:0.5px;
 }
+.bars:hover{
+    cursor:pointer;
+}
 .chart {
     background-color: rgba(0,0,0,1);
     float: right;
     margin: 10px 20px 0 0;
 }
-.chartTitle{
-    font-family: sans-serif;
+.title{
     font-size: 1.5em;
     font-weight: bold;
+    position:absolute;
+    top:0;
+    fill:white;
+    font-variant:normal;
 }
 .tick{
     fill:rgba(255,255,255,0.2);
@@ -69,12 +104,10 @@ body{
     pointer-events: none;
 }
 .axisLabel{
-    font-family: sans-serif;
     font-size:20px;
     fill:white
 }
 .axisHalo{
-    font-family: sans-serif;
     fill:none;
     stroke:#fff;
     stroke-width:0;
@@ -88,11 +121,10 @@ body{
     left: 0px;
     height:100vh;
     z-index: 10;
-    font-family: sans-serif;
-    font-size: 1em;
+    font-size:24px;
     font-weight: bold;
+    font-variant:small-caps;
 }
-
 .sideoption {
     font-weight: normal;
     color:white;
@@ -104,16 +136,28 @@ body{
 .legend{
     border-bottom: 2px white solid;
     text-align:right;
+    font-size: 14px !important;
+
+}
+.selectionDesc{
+    padding-top:20px;
+    font-size:18px;
+    font-variant:normal;
+}
+.legendLabel{
+    font-size:16px;
+    margin:5px 0;
+    font-variant:normal;
+
 }
 
 .infolabel {
     margin: 0 20px 0 0;
     position: absolute;
-    height: 50px;
-    min-width: 100px;
+    max-width: 250px;
     color: #fff;
-    background-color: #000;
-    border: solid thin #fff;
+    background-color:black;
+    /*border: solid thin #fff;*/
     padding: 5px 10px;
     top: -75px;
 }
@@ -125,7 +169,12 @@ body{
     line-height: 1em;
 }
 
+.infolabel h2{
+    margin:0;
+    padding:0;
+}
+
 .selectionDesc{
-    overflow-y:scroll;
+    overflow-y:auto;
     overflow-x:hidden;
 }
