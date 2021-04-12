@@ -1,34 +1,14 @@
-//MAKE BACKGROUND COLOR OF EACH OPTION THE SAME AS THEIR THEME COLOR
 (function(){
     //attribute variables
     var attrArray = ["STREET","COMMERCIAL","GREEN","INDUSTRY","MULTIFAM","OTHER","PUBLIC","SINGLEFAM","VACANT","TOTAL"],
         expressed = attrArray[0],
-        total = "TOTAL",
-        colorClasses = [
-            ['#f7f7f7','#cccccc','#969696','#636363','#252525'],
-            ['#f0f9e8','#bae4bc','#7bccc4','#43a2ca','#0868ac'],
-            ['#ffffcc','#c2e699','#78c679','#31a354','#006837'],
-            ['#fef0d9','#fdcc8a','#fc8d59','#e34a33','#b30000'],
-            ['#feebe2','#fbb4b9','#f768a1','#c51b8a','#7a0177'],
-            ['#ffffd4','#fed98e','#fe9929','#d95f0e','#993404'],
-            ['#f6eff7','#bdc9e1','#67a9cf','#1c9099','#016c59'],
-            ['#edf8fb','#b3cde3','#8c96c6','#8856a7','#810f7c'],
-            ['#f0f9e8','#bae4bc','#7bccc4','#43a2ca','#0868ac']
-        ],
-        legendLabels = [];
+        total = "TOTAL";
 
-    /*DIMENSIONS*/
-    //page 
-    var h = window.innerHeight, 
-        w = window.innerWidth;
-    //map
-    var mapWidth = w * ((2/6)), 
-        mapHeight = h - 30; 
-    //chart
-    var chartWidth = w/2 - 40,
-        chartHeight = h - 30,
+    //chart frame dimensions
+    var chartWidth = window.innerWidth * 0.45,
+        chartHeight = window.innerHeight - 30,
         innerRadius = 50,
-        outerRadius = Math.min(chartWidth, chartHeight) / 2 - 50;    
+        outerRadius = Math.min(chartWidth, chartHeight) / 2 - 50;
 
     //Chart scales - domains will be defined when chart is created
     var x = d3.scaleBand()
@@ -36,28 +16,28 @@
         .align(0)   
 
     var y = d3.scaleRadial()
-        .range([innerRadius, outerRadius]); 
+        .range([innerRadius, outerRadius]);  
 
     //initialize map
     window.onload = setMap();
 
     function setMap(){
+        //find width/height of window
+        var w = window.innerWidth * 0.5, h = window.innerHeight - 30; 
+
         //create map
         var map = d3.select("body")
             .append("svg")
             .attr("class", "map")
-            .attr("width", mapWidth)
-            .attr("height", mapHeight)
-            .style("padding-left", function(){
-                return window.innerWidth/6 + 20 + "px";
-            });
+            .attr("width", w)
+            .attr("height", h);
         //transverse cylindrical equal area projection, centered on Milwaukee
         var projection = d3.geoEquirectangular()
             .center([44.5, 0])
             .rotate([87.95, -87.55, 90])
             .angle(-90)
             .scale(140000.00)
-            .translate([mapWidth / 2, mapHeight / 2]);
+            .translate([w / 2, h / 2]);
 
         var path = d3.geoPath()
             .projection(projection);
@@ -75,12 +55,13 @@
 
             var neighborhoodsObj = topojson.feature(neighborhoodData, neighborhoodData.objects.mkeNeighborhoods).features,
                 countiesObj = topojson.feature(countiesData, countiesData.objects.wiCounties);
+            //wisconsin counties
+            var counties = map.append("path")
+                .datum(countiesObj)
+                .attr("class", "counties")
+                .attr("d", path);
 
-            var colorScale = makeColorScale(attributesData, colorClasses[0]);
-            
-            colorScale.range().forEach(function(d){
-                legendLabels.push(colorScale.invertExtent(d))
-            })
+            var colorScale = makeColorScale(attributesData);
 
             neighborhoodsObj = joinData(neighborhoodsObj, attributesData)
 
@@ -139,15 +120,6 @@
             .attr("class", "chartTitle")
             .text("Street Cover as % of Total Land Cover");
         
-        var totalData = [];
-        for (var i = 0; i < tableData.length; i++){
-            for (var f = 0; f < attrArray.length; f++){
-                if (totalData[attrArray[f]])
-                    totalData[attrArray[f]] = totalData[attrArray[f]] + Number(tableData[i][attrArray[f]]);
-                else    
-                totalData[attrArray[f]] = Number(tableData[i][attrArray[f]]);
-            }
-        }
         //set x and y domain
         x.domain(tableData.map(function(d) { return d.OBJECTID; }) ); // The domain of the X axis is the list of states.
         y.domain([0, maxData(tableData)]); 
@@ -222,17 +194,8 @@
     //when a new feature is selected
     function changeAttribute(attribute, csvData){
         expressed = attribute;
-        legendLabels = [];
-        var colorScale;
 
-        for (var i = 0; i < attrArray.length; i++){
-            if (attrArray[i] == expressed){
-                colorScale = makeColorScale(csvData, colorClasses[i]);
-                colorScale.range().forEach(function(d){
-                    legendLabels.push(colorScale.invertExtent(d))
-                })
-            }
-        }
+        var colorScale = makeColorScale(csvData);
 
         var regions = d3.selectAll(".neighborhood")
             .transition()
@@ -366,7 +329,15 @@
         return obj;
     }
     //create the color scale
-    function makeColorScale(data, colorClasses){
+    function makeColorScale(data){
+        var colorClasses = [
+            "#ffffb2",
+            "#fecc5c",
+            "#fd8d3c",
+            "#f03b20",
+            "#bd0026"
+        ];
+
         var colorScale = d3.scaleQuantile()
             .range(colorClasses)
 
@@ -381,123 +352,33 @@
         return colorScale;
     }
 
-    function createDropdown(csv){                
-        var sidebar = d3.select("body")
-            .append("div")
-            .attr("class","sidebar");
-        
-        var attrOptions = sidebar.selectAll("attrOptions")
+    function createDropdown(csv){
+        var dropdown = d3.select("body")
+            .append("select")
+            .attr("class","dropdown")
+            .on("change", function(){
+                changeAttribute(this.value, csv)
+            });
+
+        var titleOption = dropdown.append("option")
+            .attr("class","titleOption")
+            .attr("disabled","true")
+            .text("Select Attribute");
+
+        var attrOptions = dropdown.selectAll("attrOptions")
             .data(attrArray)
             .enter()
-            .append("div")
-            .attr("class",function(d){
-                return "sideoption sidebar-" + d;
-            })
+            .append("option")
             .attr("value", function(d){
                 return d;
             })
             .text(function(d){
                 return d;
-            })
-            .style("width",function(){
-                return w * (1/6) + "px";
-            })
-            .on("click",function(){
-                changeAttribute(this.innerText, csv)
-                selected(this.innerText, h)
-            }); 
-        
-        selected(expressed, h);
-        
-        function selected(selection ,h){
-            var selectionClass = ".sidebar-" + selection;
-            var optionHeight = 0,
-                current,
-                colorIndex = 0;
-                        
-            d3.selectAll(".sideoption")
-                .transition()
-                .duration(1000)    
-                .style("background-color",function(){
-                    var i = colorIndex;
-                        colorIndex++;
-                    return colorClasses[i][1];
-                })
-                .style("height",function(){
-                    optionHeight += ((h/2)/(attrArray.length - 1)) - 20;
-                    return ((h/2)/(attrArray.length - 1)) - 20 + "px";
-                }); 
-
-            d3.selectAll(selectionClass)
-                .transition()
-                .duration(1000)    
-                .style("background-color",function(){
-                    for (var i = 0; i < attrArray.length; i++){
-                        if (attrArray[i] == selection){
-                            makeLegend(selectionClass, colorClasses[i])
-                            return colorClasses[i][3];
-                        }
-                    }
-                })
-                .style("height",function(){
-                    return h/2 - 20 + "px";
-                });
-
-            d3.selectAll(selectionClass)
-                .append("p")
-                .attr("class","selectionDesc")
-                .style("height",function(){
-                    return h/2 - 20 - 200 + "px";
-                })
-                .html("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
-            
-        }
-
-        function makeLegend(selectionClass, color){
-            var legendData = [];
-            color.forEach(function(d, i){
-                var temp = {
-                    color: d,
-                    label: legendLabels[i],
-                    index: i
-                }
-                legendData.push(temp);
-            })
-            
-            d3.selectAll(".legend-container")
-                .remove();     
-            
-            var block = d3.select(selectionClass)
-                .append("div")
-                .attr("class","legend-container");
-            
-            block.selectAll("legend-items")
-                .data(legendData)
-                .enter()
-                .append("div")
-                .attr("class",function(d){
-                    return "legend legend-item-" + d.color
-                })
-                .html(function(d){
-                    if (d.index < 4)
-                        return d.label[0].toFixed(1) + "%";
-                    else 
-                        return d.label[0].toFixed(1) + "% <br/><br/>" + d.label[1].toFixed(1) + "%";
-                })
-                .style("height","30px")
-                .style("width","100%")
-                .style("background-image",function(d){
-                    return "linear-gradient(to right, " + d.color + " 50%, " + color[3] + " 50%)";
-                });
-            
-            block.selectAll("legend-text")
-                .append("p");
-
-        }
+            });
     }
 
     function setLabel(props){
-        var displayValue = ((props[expressed]/props[total]) * 100).toFixed(2);
+        var displayValue = ((props[expressed]/props[total]) * 100).toFixed(2);;
         var labelAttribute = "<h1>" + displayValue + "% " + expressed + "<h1>";
 
         var infoLabel = d3.select("body")
